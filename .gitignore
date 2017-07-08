@@ -1,3 +1,6 @@
+# Big Files
+data/prosperLoanData.csv
+
 # History files
 .Rhistory
 .Rapp.history

@@ -1,0 +1,433 @@
+---
+title: Exploration of Loan Data from Prosper by Yajie ZHU
+output: 
+  html_document: 
+    css: ~/templates/styles/basic.css
+    fig_caption: yes
+    number_sections: yes
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(forcats)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+dat <- read_csv('data/prosperLoanData.csv')
+```
+
+The dataset in this report contains 113,937 loans with 81 variables on 
+each loan, including loan amount, borrower rate (or interest rate), 
+current loan status, borrower income, borrower employment status, 
+borrower credit history, and the latest payment information.
+
+# Data Checking Section
+
+## Check Repeated Records
+
+There are `r nrow(dat)` rows in this dataset while the number of the unique 
+value of `ListingKey` is only `r length(unique(dat$ListingKey))` (less than 
+the number of the rows), which should be checked before further analysis.
+
+So I checked the count of each ListingKey and show the top 5 ListingKeys below 
+which appear more than once in the dataset:
+
+```{r check-ListingKey}
+count(dat, ListingKey, sort = T) %>% filter(n > 1) %>% head(5)
+```
+
+For the ListingKey ("17A93590655669644DB4C06") which appears six times in the
+dataset, I checked all the six records and found that the `ProsperScore` column
+is different among these records. However, this is the only difference exists 
+in the data and I think there should be an addtional column which indicates when
+the `ProsperScore` was changed.
+
+```{r results='hide'}
+filter(dat, ListingKey == "17A93590655669644DB4C06") %>% unique()
+```
+
+Anyway, there are no repeated records for ListingKey ("17A93590655669644DB4C06")
+so no further action is necessary to be taken. Furthermore, after run the code
+`unique(dat) %>% dim()` it seems that there are no repeated records in the whole
+dataset.
+
+```{r, results='hide'}
+unique(dat) %>% dim()
+```
+
+## Check Missing Data
+
+It's an important step to check the missing value in the dataset and decide 
+whether the missing data will affect the analysis significantly before 
+performing any analysis. So I calculated the ratio of missing value for 
+each column of this dataset and printed the columns of which the missing data 
+is more than 20% in the below table:
+
+```{r}
+na_ratio <- map(dat, ~mean(is.na(.))) %>% as.matrix()
+na_ratio <- tibble(col = rownames(na_ratio),
+                   ratio = as.numeric(na_ratio))
+na_ratio %>% arrange(-ratio) %>% filter(ratio > 0.2)
+```
+
+At first it looks like that there are 18 variables whose missing data is more 
+than 20%, however, after reading the data variables definitions, it turns out 
+the `NA` value for each of these variables has its specific meaning, which 
+means they are not really the "missing value". Therefore, I believe that this 
+is probably a clean dataset and it's time to play with the data!
+
+# Univariate Plots Section
+
+## Ask the Questions
+
+For the Univariate Plots Section, I choose the following questions to explore
+in this project:
+
+1. What's the date period of this dataset?
+1. What's the distribution of the category of the listing that 
+the borrower selected when posting their listing?
+1. What's the percentage of each LoanStatus in this dataset?
+1. What's the percentage of each EmploymentStatus in this dataset?
+1. What's the distribution of EmploymentStatusDuration in this dataset?
+1. What's the percentage of the Homeowner in the Borrowers?
+1. What's the percentage of the defaulted loans and what's the distribution
+of the cycle of these defaulted loans?
+1. What's the distribution of ProsperScore in this dataset?
+
+## What's the date period of this dataset?
+
+At the first of all, I would like to check the time period of this dataset:
+
+```{r}
+summary(dat$ListingCreationDate)
+```
+
+The time period of this dataset is from 2005-11-09 to 2014-03-10.
+
+## What's the distribution of the category of the listing?
+
+```{r}
+dat %>%
+  mutate(`ListingCategory (numeric)` = 
+           factor(`ListingCategory (numeric)`,
+                  levels = unique(dat$`ListingCategory (numeric)`))) %>%
+  mutate(ListingCategory = fct_recode(`ListingCategory (numeric)`,
+    "Not Available" = "0", 
+    "Debt Consolidation" = "1", 
+    "Home Improvement" = "2",
+    "Business" = "3",
+    "Personal Loan" = "4",
+    "Student Use" = "5",
+    "Auto" = "6",
+    "Other" = "7",
+    "Baby&Adoption" = "8",
+    "Boat" = "9",
+    "Cosmetic Procedure" = "10",
+    "Engagement Ring" = "11",
+    "Green Loans" = "12",
+    "Household Expenses" = "13",
+    "Large Purchases" = "14",
+    "Medical/Dental" = "15",
+    "Motorcycle" = "16",
+    "RV" = "17",
+    "Taxes" = "18",
+    "Vacation" = "19",
+    "Wedding Loans" = "20") %>% fct_infreq() %>% fct_rev()) %>%
+    ggplot(aes(ListingCategory)) + geom_bar() + coord_flip()
+```
+
+It's interesting to see that the most popular ListingCategory is 
+"Debt Consolidation", which looks like morn than the sum of all the other types.
+The second and third popular ListingCategory are "Not Available" and "Other",
+which provides little effective information about the usage of the debt.
+
+## What's the percentage of each LoanStatus?
+
+```{r echo=FALSE}
+dat %>% 
+  mutate(LoanStatus = LoanStatus %>% fct_infreq() %>% fct_rev()) %>%
+  ggplot(aes(LoanStatus)) + geom_bar() + coord_flip()
+```
+
+We can see that only a little fraction of the loans are in the "Past Due" 
+status, and the longer the past due days, the less numbers they are. 
+
+However, the number of the "Chargedoff" loans is 
+`r sum(dat$LoanStatus == 'Chargedoff')` and the number of the "Defaulted" 
+loans is `r sum(dat$LoanStatus == 'Defaulted')`, which means the default risk
+is high and should be addressed by the investors (Loans of Chargedoff status 
+and Defaulted status stand for `r paste0(round(100*mean(dat$LoanStatus %in% c("Chargedoff", "Defaulted")), 2), "%")` of the total loans).
+
+## What's the percentage of each EmploymentStatus?
+
+```{r}
+dat %>%
+  mutate(EmploymentStatus = EmploymentStatus %>% 
+           fct_infreq() %>% fct_rev()) %>%
+  ggplot(aes(EmploymentStatus)) + 
+  geom_bar() + coord_flip()
+```
+
+There is no surprise that the majority of the borrowers have a job, because 
+people with no job have difficulties to obtian the loans.
+
+## What's the distribution of EmploymentStatusDuration?
+
+```{r}
+dat %>%
+  ggplot(aes(EmploymentStatusDuration)) +
+  geom_histogram(binwidth = 10, fill = "blue", 
+                 color = "black", alpha = 0.6)
+```
+
+```{r}
+summary(dat$EmploymentStatusDuration)
+```
+
+The figure above shows that the distribution of EmploymentStatusDuration is 
+positive skewed, and the summary of EmploymentStatusDuration shows that about
+one quarter have more than 10 years of employment, and about one half have more
+than 5 years of employment.
+
+## What's the percentage of the Homeowner in the Borrowers?
+
+```{r}
+dat %>%
+  ggplot(aes(IsBorrowerHomeowner)) +
+  geom_bar(width = 0.5, fill = "blue", alpha = 0.8)
+```
+
+It shows that the percentage of the homeowner in the borrowers is about one half.
+
+## What's the percentage of the defaulted loans?
+
+The data variable definitions show that for the "LoanFirstDefaultedCycleNumber"
+column: If the loan has not charged off the value will be null. So we can use
+this variable to compute the percentage of the defaulted loans, which is
+`r paste0(round(100*mean(!is.na(dat$LoanFirstDefaultedCycleNumber)), 2), "%")`.
+
+## What's the distribution of the cycle of these defaulted loans?
+
+Furthermore, the distribution of the cycle of these defaulted loans may reveal
+more information:
+
+```{r}
+dat %>%
+  filter(!is.na(LoanFirstDefaultedCycleNumber)) %>%
+  ggplot(aes(LoanFirstDefaultedCycleNumber)) +
+  geom_bar(fill = "blue", alpha = 0.8)
+```
+
+It's interesting to find that if default didn't occur in the first two cycles, 
+then it's unlikely to occur in the following three cycles.
+
+## What's the distribution of ProsperScore?
+
+```{r}
+dat %>%
+  filter(!is.na(ProsperScore)) %>%
+  ggplot(aes(ProsperScore)) +
+  geom_bar(fill = "blue", alpha = 0.8)
+```
+
+The distribution of ProsperScore looks like a normal distribution while the top
+3 most frequently ProsperScores are 4, 6, and 8, and the top 2 least frequently 
+ProsperScores are 1 and 11. However, the data varibale definitions show that the
+ProsperScore ranges from 1-10, with 10 being the best, or lowest risk score. So
+I decide to double check the ProsperScore field:
+
+```{r}
+count(dat, ProsperScore) %>% filter(ProsperScore == 11)
+```
+
+**It seems like that there are 1456 rows of which the ProsperScore equals 11, but
+11 is not a valid score based on the data varibale definitions. So I suspect 
+that this maybe a data error or something else, which need to be investigated
+in the further analysis.**
+
+# Univariate Analysis
+
+## What is the structure of your dataset?
+
+There are 113,937 loans with 81 variables including loan amount, 
+borrower rate (or interest rate), current loan status, 
+borrower income, borrower employment status, borrower credit history, 
+and the latest payment information in this dataset.
+
+There are so many variables in this dataset so it is difficult to explore each 
+variable one by one. Instead, it woule be more appropriate to adopt a 
+problem-oriented approach to explore this dataset. Actually I used this approach
+in this project.
+
+## What is/are the main feature(s) of interest in your dataset?
+
+The main features of interest in this dataset are:
+
+1. `LoanFirstDefaultedCycleNumber`;
+1. `ProsperScore`, `ProsperRating (Alpha)`, `ProsperRating (numeric)`;
+1. `CreditScoreRangeLower`, `CreditScoreRangeUpper`.
+
+I choose these features as the main features because for the loan business, 
+the most important concern is the credit/default risk. For the creditor/lender,
+what they most want to forecast is whether the borrower will default on the loan
+and when the borrower will most likely default.
+
+## What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+Of the six main features of interest described above, I choose 
+`LoanFirstDefaultedCycleNumber` as the target feature, and try to use 
+`ProsperScore`, `ProsperRating (Alpha)`, `ProsperRating (numeric)`, 
+`CreditScoreRangeLower`, `CreditScoreRangeUpper` as well as other features to
+predict whether the borrower will default and when the borrower will most 
+likely default.
+
+## Did you create any new variables from existing variables in the dataset?
+
+For the Univariate Plots Section, I didn't create new variables from existing
+variables, but I did modify some variables (such as changing the factor levels
+or reorder the factor) in order to make better visualisations.
+
+However, for the Bivariate Plots (Analysis) Section and 
+Multivariate Plots (Analysis) Section, I will create some new variables to get
+better understanding of the data and build better models.
+
+## Of the features you investigated, were there any unusual distributions?
+
+Of the features you investigated EmploymentStatusDuration and 
+LoanFirstDefaultedCycleNumber don't follow normal distribution and both of them 
+are positive skewed.
+
+**Did you perform any operations on the data to tidy, adjust, or change the form
+of the data? If so, why did you do this?**
+
+As I mentioned before, I modify some variables (such as changing the factor levels
+or reorder the factor) in order to make better visualisations.
+
+# Bivariate Plots Section
+
+1. What's the distribution of IncomeRange of the Borrowers (only for 
+the group have verifiable income)? 
+1. What's the distribution of StatedMonthlyIncome of the Borrowers (only for 
+the group have verifiable income)?
+
+```{r}
+dat %>%
+  ggplot(aes(IncomeRange)) +
+  geom_bar() +
+  facet_wrap(~IncomeVerifiable) +
+  coord_flip()
+```
+
+
+```{r}
+dat %>%
+  ggplot(aes(StatedMonthlyIncome)) +
+  geom_histogram(binwidth = 100) +
+  facet_wrap(~IncomeVerifiable) +
+  coord_flip()
+```
+
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+```{r}
+count(dat, `ProsperRating (numeric)`, `ProsperRating (Alpha)`)
+```
+
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+# Bivariate Analysis
+
+> **Tip**: As before, summarize what you found in your bivariate explorations
+here. Use the questions below to guide your discussion.
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+# Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the \
+strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. What were some of the struggles that you went through?
+What went well? What was surprising? Make sure you include an insight into
+future work that could be done with the dataset.
+
+> **Tip**: Don't forget to remove this, and the other **Tip** sections before
+saving your final work and knitting the final report!
