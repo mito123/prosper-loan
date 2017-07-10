@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(ggplot2)
 library(tidyverse)
 library(forcats)
+writeLines(capture.output(sessionInfo()), "sessionInfo.txt")
 ```
 
 ```{r echo=FALSE, Load_the_Data}

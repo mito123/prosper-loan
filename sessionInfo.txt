@@ -1,0 +1,25 @@
+R version 3.3.2 (2016-10-31)
+Platform: x86_64-apple-darwin16.1.0 (64-bit)
+Running under: macOS Sierra 10.12.5
+
+locale:
+[1] zh_CN.UTF-8/zh_CN.UTF-8/zh_CN.UTF-8/C/zh_CN.UTF-8/zh_CN.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] forcats_0.2.0   dplyr_0.7.1     purrr_0.2.2.2   readr_1.1.1     tidyr_0.6.3    
+[6] tibble_1.3.3    tidyverse_1.1.1 ggplot2_2.2.1  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.11        cellranger_1.1.0    plyr_1.8.4          bindr_0.1          
+ [5] tools_3.3.2         jsonlite_1.5        lubridate_1.6.0     nlme_3.1-131       
+ [9] gtable_0.2.0        lattice_0.20-35     pkgconfig_2.0.1     rlang_0.1.1        
+[13] psych_1.7.5         parallel_3.3.2      haven_1.0.0         bindrcpp_0.2       
+[17] xml2_1.1.1          stringr_1.2.0       httr_1.2.1          knitr_1.16         
+[21] hms_0.3             grid_3.3.2          glue_1.1.1          R6_2.2.2           
+[25] readxl_1.0.0        foreign_0.8-69      reshape2_1.4.2      modelr_0.1.0       
+[29] magrittr_1.5        scales_0.4.1        rvest_0.3.2         assertthat_0.2.0   
+[33] mnormt_1.5-5        colorspace_1.3-2    stringi_1.1.5       lazyeval_0.2.0.9000
+[37] munsell_0.4.3       broom_0.4.2        
