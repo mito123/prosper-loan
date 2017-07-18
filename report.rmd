@@ -2,7 +2,7 @@
 title: Exploration of Loan Data from Prosper by Yajie ZHU
 output: 
   html_document: 
-    css: ~/templates/styles/basic.css
+    css: "css/basic.css"
     fig_caption: yes
     number_sections: yes
 ---
@@ -15,9 +15,117 @@ library(forcats)
 writeLines(capture.output(sessionInfo()), "sessionInfo.txt")
 ```
 
-```{r echo=FALSE, Load_the_Data}
+```{r Load-the-Data}
 # Load the Data
-dat <- read_csv('data/prosperLoanData.csv')
+dat <- readr::read_csv(
+  'data/prosperLoanData.csv',
+  col_types = cols(
+    ListingKey = col_character(),
+    # parse_guess: col_integer()
+    ListingNumber = col_character(),
+    ListingCreationDate = col_datetime(format = ""),
+    # parse_guess: col_charater()
+    CreditGrade = 
+      col_factor(c("NC", "HR", "E", "D", "C", "B", "A", "AA"), 
+                 include_na = TRUE),
+    Term = col_integer(),
+    # parse_guess: col_character()
+    LoanStatus = col_factor(levels = NULL),
+    ClosedDate = col_datetime(format = ""),
+    BorrowerAPR = col_double(),
+    BorrowerRate = col_double(),
+    LenderYield = col_double(),
+    EstimatedEffectiveYield = col_double(),
+    EstimatedLoss = col_double(),
+    EstimatedReturn = col_double(),
+    # parse_guess: col_integer()
+    `ProsperRating (numeric)` = 
+      col_factor(levels = c(1, 2, 3, 4, 5, 6, 7), include_na = TRUE),
+    # parse_guess: col_character()
+    `ProsperRating (Alpha)` = 
+      col_factor(levels = c("HR", "E", "D", "C", "B", "A", "AA"), 
+                 include_na = TRUE),
+    ProsperScore = col_double(),
+    # parse_guess: col_integer()
+    `ListingCategory (numeric)` = col_factor(levels = NULL),
+    # parse_guess: col_character()
+    BorrowerState = col_factor(levels = NULL),
+    # parse_guess: col_character()
+    Occupation = col_factor(levels = NULL),
+    # parse_guess: col_character()
+    EmploymentStatus = col_factor(levels = NULL),
+    EmploymentStatusDuration = col_integer(),
+    # parse_guess: col_character()
+    IsBorrowerHomeowner = col_logical(),
+    # parse_guess: col_character()
+    CurrentlyInGroup = col_logical(),
+    GroupKey = col_character(),
+    DateCreditPulled = col_datetime(format = ""),
+    CreditScoreRangeLower = col_integer(),
+    CreditScoreRangeUpper = col_integer(),
+    FirstRecordedCreditLine = col_datetime(format = ""),
+    CurrentCreditLines = col_integer(),
+    OpenCreditLines = col_integer(),
+    TotalCreditLinespast7years = col_integer(),
+    OpenRevolvingAccounts = col_integer(),
+    OpenRevolvingMonthlyPayment = col_double(),
+    InquiriesLast6Months = col_integer(),
+    TotalInquiries = col_double(),
+    CurrentDelinquencies = col_integer(),
+    AmountDelinquent = col_double(),
+    DelinquenciesLast7Years = col_integer(),
+    PublicRecordsLast10Years = col_integer(),
+    PublicRecordsLast12Months = col_integer(),
+    RevolvingCreditBalance = col_double(),
+    BankcardUtilization = col_double(),
+    AvailableBankcardCredit = col_double(),
+    TotalTrades = col_double(),
+    `TradesNeverDelinquent (percentage)` = col_double(),
+    TradesOpenedLast6Months = col_double(),
+    DebtToIncomeRatio = col_double(),
+    # parse_guess: col_character()
+    IncomeRange = 
+      col_factor(levels = 
+                   c("$0", "$1-24,999", "$25,000-49,999", "$50,000-74,999",
+                     "$75,000-99,999", "$100,000+", "Not employed",
+                     "Not displayed")),
+    # parse_guess: col_character()
+    IncomeVerifiable = col_logical(),
+    StatedMonthlyIncome = col_double(),
+    LoanKey = col_character(),
+    TotalProsperLoans = col_integer(),
+    TotalProsperPaymentsBilled = col_integer(),
+    OnTimeProsperPayments = col_integer(),
+    ProsperPaymentsLessThanOneMonthLate = col_integer(),
+    ProsperPaymentsOneMonthPlusLate = col_integer(),
+    ProsperPrincipalBorrowed = col_double(),
+    ProsperPrincipalOutstanding = col_double(),
+    ScorexChangeAtTimeOfListing = col_integer(),
+    LoanCurrentDaysDelinquent = col_integer(),
+    LoanFirstDefaultedCycleNumber = col_integer(),
+    LoanMonthsSinceOrigination = col_integer(),
+    # parse_guess: col_integer()
+    LoanNumber = col_character(),
+    LoanOriginalAmount = col_integer(),
+    LoanOriginationDate = col_datetime(format = ""),
+    LoanOriginationQuarter = col_character(),
+    MemberKey = col_character(),
+    MonthlyLoanPayment = col_double(),
+    LP_CustomerPayments = col_double(),
+    LP_CustomerPrincipalPayments = col_double(),
+    LP_InterestandFees = col_double(),
+    LP_ServiceFees = col_double(),
+    LP_CollectionFees = col_double(),
+    LP_GrossPrincipalLoss = col_double(),
+    LP_NetPrincipalLoss = col_double(),
+    LP_NonPrincipalRecoverypayments = col_double(),
+    PercentFunded = col_double(),
+    Recommendations = col_integer(),
+    InvestmentFromFriendsCount = col_integer(),
+    InvestmentFromFriendsAmount = col_double(),
+    Investors = col_integer()
+  )
+)
 ```
 
 The dataset in this report contains 113,937 loans with 81 variables on 
@@ -74,9 +182,9 @@ na_ratio <- tibble(col = rownames(na_ratio),
 na_ratio %>% arrange(-ratio) %>% filter(ratio > 0.2)
 ```
 
-At first it looks like that there are 18 variables whose missing data is more 
-than 20%, however, after reading the data variables definitions, it turns out 
-the `NA` value for each of these variables has its specific meaning, which 
+At first it looks like that there are 18 variables whose missing data ratio is 
+more than 20%, however, after reading the data variables definitions, it turns 
+out the `NA` value for each of these variables has its specific meaning, which 
 means they are not really the "missing value". Therefore, I believe that this 
 is probably a clean dataset and it's time to play with the data!
 
@@ -94,11 +202,15 @@ the borrower selected when posting their listing?
 1. What's the percentage of each EmploymentStatus in this dataset?
 1. What's the distribution of EmploymentStatusDuration in this dataset?
 1. What's the percentage of the Homeowner in the Borrowers?
+1. What's the distribution of IncomeRange of the Borrowers? (separate the 
+dataset into two groups based on whether they have verifiable income)
+1. What's the distribution of StatedMonthlyIncome of the Borrowers? (separate 
+the dataset into two groups based on whether they have verifiable income)?
 1. What's the percentage of the defaulted loans and what's the distribution
 of the cycle of these defaulted loans?
 1. What's the distribution of ProsperScore in this dataset?
 
-## What's the date period of this dataset?
+## Question: What's the date period of this dataset?
 
 At the first of all, I would like to check the time period of this dataset:
 
@@ -108,7 +220,7 @@ summary(dat$ListingCreationDate)
 
 The time period of this dataset is from 2005-11-09 to 2014-03-10.
 
-## What's the distribution of the category of the listing?
+## Question: What's the distribution of the category of the listing?
 
 ```{r}
 dat %>%
@@ -145,7 +257,7 @@ It's interesting to see that the most popular ListingCategory is
 The second and third popular ListingCategory are "Not Available" and "Other",
 which provides little effective information about the usage of the debt.
 
-## What's the percentage of each LoanStatus?
+## Question: What's the percentage of each LoanStatus?
 
 ```{r echo=FALSE}
 dat %>% 
@@ -162,7 +274,7 @@ loans is `r sum(dat$LoanStatus == 'Defaulted')`, which means the default risk
 is high and should be addressed by the investors (Loans of Chargedoff status 
 and Defaulted status stand for `r paste0(round(100*mean(dat$LoanStatus %in% c("Chargedoff", "Defaulted")), 2), "%")` of the total loans).
 
-## What's the percentage of each EmploymentStatus?
+## Question: What's the percentage of each EmploymentStatus?
 
 ```{r}
 dat %>%
@@ -175,7 +287,7 @@ dat %>%
 There is no surprise that the majority of the borrowers have a job, because 
 people with no job have difficulties to obtian the loans.
 
-## What's the distribution of EmploymentStatusDuration?
+## Question: What's the distribution of EmploymentStatusDuration?
 
 ```{r}
 dat %>%
@@ -183,6 +295,8 @@ dat %>%
   geom_histogram(binwidth = 10, fill = "blue", 
                  color = "black", alpha = 0.6)
 ```
+
+Summary information of `EmploymentStatusDuration` is: 
 
 ```{r}
 summary(dat$EmploymentStatusDuration)
@@ -193,7 +307,7 @@ positive skewed, and the summary of EmploymentStatusDuration shows that about
 one quarter have more than 10 years of employment, and about one half have more
 than 5 years of employment.
 
-## What's the percentage of the Homeowner in the Borrowers?
+## Question: What's the percentage of the Homeowner in the Borrowers?
 
 ```{r}
 dat %>%
@@ -203,14 +317,95 @@ dat %>%
 
 It shows that the percentage of the homeowner in the borrowers is about one half.
 
-## What's the percentage of the defaulted loans?
+## Question: What's the percentage of the defaulted loans?
 
 The data variable definitions show that for the "LoanFirstDefaultedCycleNumber"
 column: If the loan has not charged off the value will be null. So we can use
 this variable to compute the percentage of the defaulted loans, which is
 `r paste0(round(100*mean(!is.na(dat$LoanFirstDefaultedCycleNumber)), 2), "%")`.
 
-## What's the distribution of the cycle of these defaulted loans?
+Also, we can create a bar plot to show this information:
+
+```{r}
+dat %>% mutate(is_defaulted = !is.na(LoanFirstDefaultedCycleNumber)) %>%
+  ggplot(aes(is_defaulted)) + geom_bar(width = 0.5, fill = "blue", alpha = 0.8)
+```
+
+
+## What's the distribution of IncomeRange of the Borrowers?
+
+```{r}
+dat %>%
+  ggplot(aes(IncomeRange)) +
+  geom_bar() +
+  facet_wrap(~IncomeVerifiable) +
+  coord_flip()
+```
+
+We can see that the majority have verified income, and most two popular income 
+ranges are "\$25,000-49,999" and "\$50,000-74,999".
+
+## What's the distribution of StatedMonthlyIncome of the Borrowers?
+
+```{r}
+dat %>%
+  ggplot(aes(StatedMonthlyIncome)) +
+  geom_histogram(binwidth = 100) +
+  facet_wrap(~IncomeVerifiable) +
+  coord_flip()
+```
+
+Wow, the figure above doesn't look good, most part of this figure is just blank.
+However, we can found an important clue: some people have a monthly income of 
+more than \$1500000. Because this is a really big number, so the first thought 
+came up to my mind is whether this income is verified?
+
+In order to check this, let's filter the records which have more than \$1500000
+monthly income:
+
+```{r}
+dat %>% filter(StatedMonthlyIncome > 1500000) %>%
+  select(IncomeVerifiable, StatedMonthlyIncome)
+```
+
+Aha, there is only one person has such a high income but it's not verified. So,
+is this a false information or the person is a really wealthy but unwilling to
+share his or her information?
+
+After checked every feature of this person, I found this person has already 
+finished 33 trades and has no record of delinquencies. Also, the credit score
+looks good.
+
+However, I noticed that the `LoanOriginalAmount` is only "4000", so I am 
+wondering why a person who can earn more than \$1500000 need to borrow "$4000"? 
+This is unreasonable.
+
+So, for now, I would say that this `StatedMonthlyIncome` number is probably not a 
+true number, even though the person has a good credit history.
+
+Now, let's check the quantile percentage of `StatedMonthlyIncome`:
+
+```{r}
+quantile(dat$StatedMonthlyIncome, c(0.01, 0.25, 0.5, 0.75, 0.99, 1.0))
+```
+
+And plot the distribution of `StatedMonthlyIncome` without the lowest 1% and the
+highest 1%:
+
+```{r}
+dat %>%
+  filter(StatedMonthlyIncome > quantile(StatedMonthlyIncome, 0.01),
+         StatedMonthlyIncome < quantile(StatedMonthlyIncome, 0.99)) %>%
+  ggplot(aes(StatedMonthlyIncome)) +
+  geom_histogram(binwidth = 100) +
+  facet_wrap(~IncomeVerifiable) +
+  coord_flip()
+```
+
+Now the visualisation looks more reasonable, and it's also a positive skewed  
+distribution.
+
+## Question: What's the distribution of the cycle of these defaulted loans?
 
 Furthermore, the distribution of the cycle of these defaulted loans may reveal
 more information:
@@ -225,12 +420,12 @@ dat %>%
 It's interesting to find that if default didn't occur in the first two cycles, 
 then it's unlikely to occur in the following three cycles.
 
-## What's the distribution of ProsperScore?
+## Question: What's the distribution of ProsperScore?
 
 ```{r}
 dat %>%
   filter(!is.na(ProsperScore)) %>%
-  ggplot(aes(ProsperScore)) +
+  ggplot(aes(factor(as.integer(ProsperScore)))) +
   geom_bar(fill = "blue", alpha = 0.8)
 ```
 
@@ -241,10 +436,10 @@ ProsperScore ranges from 1-10, with 10 being the best, or lowest risk score. So
 I decide to double check the ProsperScore field:
 
 ```{r}
-count(dat, ProsperScore) %>% filter(ProsperScore == 11)
+filter(dat, ProsperScore == 11) %>% count(ProsperScore)
 ```
 
-**It seems like that there are 1456 rows of which the ProsperScore equals 11, but
+**It seems like that there are 1456 rows with the ProsperScore equals 11, but
 11 is not a valid score based on the data varibale definitions. So I suspect 
 that this maybe a data error or something else, which need to be investigated
 in the further analysis.**
@@ -253,32 +448,28 @@ in the further analysis.**
 
 ## What is the structure of your dataset?
 
-There are 113,937 loans with 81 variables including loan amount, 
-borrower rate (or interest rate), current loan status, 
-borrower income, borrower employment status, borrower credit history, 
-and the latest payment information in this dataset.
+There are 113,937 loans with 81 variables including *loan amount*, 
+*borrower rate (or interest rate)*, *current loan status*, 
+*borrower income*, *borrower employment status*, *borrower credit history*, 
+and *the latest payment information* in this dataset.
 
 There are so many variables in this dataset so it is difficult to explore each 
 variable one by one. Instead, it woule be more appropriate to adopt a 
-problem-oriented approach to explore this dataset. Actually I used this approach
-in this project.
+problem-oriented approach to explore this dataset. Actually I used this 
+problem-oriented approach in this project.
 
 ## What is/are the main feature(s) of interest in your dataset?
 
-The main features of interest in this dataset are:
+The main feature of interest (target feature) is 
+`LoanFirstDefaultedCycleNumber`, because for the loan business, 
+the most important concern is the credit/default risk.
 
-1. `LoanFirstDefaultedCycleNumber`;
-1. `ProsperScore`, `ProsperRating (Alpha)`, `ProsperRating (numeric)`;
-1. `CreditScoreRangeLower`, `CreditScoreRangeUpper`.
+For the creditor/lender, what they most want to forecast is whether the borrower
+will default on the loan and when the borrower will most likely default.
 
-I choose these features as the main features because for the loan business, 
-the most important concern is the credit/default risk. For the creditor/lender,
-what they most want to forecast is whether the borrower will default on the loan
-and when the borrower will most likely default.
+## What other features in the dataset will help support your investigation?
 
-## What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
-
-Of the six main features of interest described above, I choose 
+Of the all the features in this dateset, I choose 
 `LoanFirstDefaultedCycleNumber` as the target feature, and try to use 
 `ProsperScore`, `ProsperRating (Alpha)`, `ProsperRating (numeric)`, 
 `CreditScoreRangeLower`, `CreditScoreRangeUpper` as well as other features to
@@ -287,50 +478,26 @@ likely default.
 
 ## Did you create any new variables from existing variables in the dataset?
 
-For the Univariate Plots Section, I didn't create new variables from existing
-variables, but I did modify some variables (such as changing the factor levels
-or reorder the factor) in order to make better visualisations.
+For the Univariate Plots Section, I create a new variable `is_defaulted` from 
+`LoanFirstDefaultedCycleNumber`, and I modified some variables (changing the 
+factor levels or reorder the factor) in order to make better visualisations. 
 
-However, for the Bivariate Plots (Analysis) Section and 
-Multivariate Plots (Analysis) Section, I will create some new variables to get
+In addition, for the Bivariate Plots (Analysis) Section and 
+Multivariate Plots (Analysis) Section, I will create more new variables to get
 better understanding of the data and build better models.
 
 ## Of the features you investigated, were there any unusual distributions?
 
-Of the features you investigated EmploymentStatusDuration and 
-LoanFirstDefaultedCycleNumber don't follow normal distribution and both of them 
-are positive skewed.
+Yes, such as `EmploymentStatusDuration` and `LoanFirstDefaultedCycleNumber`,
+they don't follow normal distribution and both of them are positive skewed.
 
 **Did you perform any operations on the data to tidy, adjust, or change the form
 of the data? If so, why did you do this?**
 
-As I mentioned before, I modify some variables (such as changing the factor levels
-or reorder the factor) in order to make better visualisations.
+Yes, as I said before, I modify some variables (changing the factor 
+levels or reorder the factor) in order to make better visualisations.
 
 # Bivariate Plots Section
-
-1. What's the distribution of IncomeRange of the Borrowers (only for 
-the group have verifiable income)? 
-1. What's the distribution of StatedMonthlyIncome of the Borrowers (only for 
-the group have verifiable income)?
-
-```{r}
-dat %>%
-  ggplot(aes(IncomeRange)) +
-  geom_bar() +
-  facet_wrap(~IncomeVerifiable) +
-  coord_flip()
-```
-
-
-```{r}
-dat %>%
-  ggplot(aes(StatedMonthlyIncome)) +
-  geom_histogram(binwidth = 100) +
-  facet_wrap(~IncomeVerifiable) +
-  coord_flip()
-```
-
 
 > **Tip**: Based on what you saw in the univariate plots, what relationships
 between variables might be interesting to look at in this section? Don't limit
