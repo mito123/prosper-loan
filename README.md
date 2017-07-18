@@ -1,6 +1,6 @@
-# Data Analyst Nanodegree Project 4: Explore and Summarise Data
+# Data Analyst Nanodegree Project: Explore and Summarise Data
 
-## Dataset
+## Dataset Information
 
 **Loan Data from Prosper**: Last updated 03/11/2014.
 
