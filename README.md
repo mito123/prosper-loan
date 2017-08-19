@@ -11,4 +11,3 @@
 This data set contains 113,937 loans with 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information.
 
 **Guiding Questions:** Ask your own questions about this data set. There are MANY variables in this data set and you are not expected to explore all of them. You should explore between 10-15 variables in your analysis.
-
