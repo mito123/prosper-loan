@@ -1,7 +1,7 @@
 ---
 title: "Exploration of the Loan Data from Prosper"
 author: "Yajie ZHU"
-date: "19/08/2017"
+date: "`r Sys.Date()`"
 output: 
   html_document: 
     css: css/basic.css
@@ -498,9 +498,9 @@ rather high BorrowerRate.
 
 ## What's the number of the loans in each BorrowerState?
 
-```{r}
+```{r, fig.asp=1}
 dat %>% ggplot(aes(BorrowerState %>% fct_infreq() %>% fct_rev())) + 
-  geom_bar() + coord_flip()
+  geom_bar() + coord_flip() + labs(x = "BorrowerState")
 ```
 
 The above plot shows that the number of prosper loans in CA is far more than 
@@ -509,9 +509,9 @@ WY, AK, or VT have only a few loans.
 
 ## What's the percentage of each Occupation in this dataset?
 
-```{r}
+```{r, fig.asp=1}
 dat %>% ggplot(aes(Occupation %>% fct_infreq() %>% fct_rev())) + 
-  geom_bar() + coord_flip()
+  geom_bar() + coord_flip() + labs(x = "Occupation")
 ```
 
 The above plot clearly shows that most borrowers were either unwilling to provide their 
@@ -520,7 +520,7 @@ of "Other" value in the `Occupation` field.
 
 ## What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
 
-```{r}
+```{r, fig.asp=1}
 gridExtra::grid.arrange(
   ggplot(dat, aes(CreditScoreRangeLower)) + geom_bar(),
   ggplot(dat, aes(CreditScoreRangeUpper)) + geom_bar(),
@@ -766,10 +766,10 @@ order to avoid making this report too long to read. Instead, here I will quickly
 create a correlation matrix plot for the numeric variables to see whether there
 are highly correlated features in the dataset.
 
-```{r}
+```{r, fig.asp=1.2, fig.width=8}
 GGally::ggcorr(
   dat, geom = "circle", min_size = 0, max_size = 5,
-  hjust = 1, size = 3, color = "grey50", layout.exp = 5
+  hjust = 1, size = 3, color = "grey50", layout.exp = 6
 )
 ```
 
