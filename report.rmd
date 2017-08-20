@@ -498,6 +498,15 @@ rather high BorrowerRate.
 
 ## What's the number of the loans in each BorrowerState?
 
+```{r}
+dat %>% ggplot(aes(BorrowerState %>% fct_infreq() %>% fct_rev())) + 
+  geom_bar() + coord_flip()
+```
+
+The above plot shows that the number of prosper loans in CA is far more than 
+any other states, followed by NY, TX, and FL, however, some states such as 
+WY, AK, or VT have only a few loans.
+
 ## What's the percentage of each Occupation in this dataset?
 
 ## What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
