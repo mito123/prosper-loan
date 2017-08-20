@@ -832,7 +832,7 @@ bar_plot <- function(df, col) {
 	} else {
 		df %>% 
 			group_by(!!col) %>% 
-			summarise(default_ratio = mean(is_defaulted == "Yes")) %>% 
+			summarise(default_ratio = mean(is_defaulted == "Defaulted")) %>% 
 			mutate(col = fct_reorder(as.factor(!!col), -default_ratio)) %>% 
 			ggplot(aes(col, default_ratio)) + 
 			theme_bw(base_family = "Times New Roman") +
