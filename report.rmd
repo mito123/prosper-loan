@@ -1073,7 +1073,7 @@ dat %>%
 			paste("15", sep = "-") %>% 
 			as.Date()
 		) %>%
-	summarise(DefaultRatio = mean(is_defaulted == "Yes"),
+	summarise(DefaultRatio = mean(is_defaulted == "Defaulted"),
 						ProsperScore = mean(ProsperScore, na.rm = T)) %>%
 	gather(key, value, -Time) %>%
 	ggplot(aes(Time, value)) + geom_line(aes(Time, value), linetype = 2) + 
@@ -1390,7 +1390,7 @@ and the default ratio: the higher the income, the lower the default ratio.
 dat %>% 
 	filter(stringi::stri_startswith_fixed(Occupation, "Student")) %>%
 	group_by(Occupation) %>% 
-	summarise(n = n(), default_ratio = mean(is_defaulted == "Yes")) %>% 
+	summarise(n = n(), default_ratio = mean(is_defaulted == "Defaulted")) %>% 
 	mutate(Occupation = fct_relevel(
 		Occupation,
 		"Student - College Freshman",
@@ -1434,7 +1434,7 @@ dat %>%
 			paste("15", sep = "-") %>% 
 			as.Date()
 		) %>%
-	summarise(`Default Ratio` = mean(is_defaulted == "Yes"),
+	summarise(`Default Ratio` = mean(is_defaulted == "Defaulted"),
 						`Average ProsperScore` = mean(ProsperScore, na.rm = T)) %>%
 	gather(key, value, -Time) %>%
 	ggplot(aes(Time, value)) + geom_line(aes(Time, value), linetype = 2) + 
