@@ -871,7 +871,7 @@ state_name_abb <- tibble(state_abb = state.abb,
 states <- left_join(states, state_name_abb, by = c("region" = "state_name"))
 
 dat %>% group_by(BorrowerState) %>%
-	summarise(DefaultRatio = mean(is_defaulted == "Yes")) %>%
+	summarise(DefaultRatio = mean(is_defaulted == "Defaulted")) %>%
 	mutate(BorrowerState = as.character(BorrowerState)) %>%
 	right_join(states, by = c("BorrowerState" = "state_abb")) %>%
 	ggplot(aes(long, lat)) + coord_map() + theme_void() +
