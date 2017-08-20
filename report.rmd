@@ -815,7 +815,7 @@ the distribution of the variable separately for default loans and non-default
 loans (use a custom defined function named `violin_boxplot`).
 
 ```{r}
-bar_plot <- function(df, col) {
+bar_plot <- function(df, col, facet_ncol = 4) {
 	col <- enquo(col)
 	category_num <- df %>% count(!!col) %>% nrow()
 	# print(category_num)
@@ -824,7 +824,7 @@ bar_plot <- function(df, col) {
 			mutate(col = fct_reorder(
 				(!!col), is_defaulted, function(x){mean(x == "Yes")})) %>% 
 			ggplot(aes(is_defaulted, fill = is_defaulted)) + geom_bar() + 
-			facet_wrap(~col, scales = "free_y", ncol = 4) + 
+			facet_wrap(~col, scales = "free_y", ncol = facet_ncol) + 
 			theme_bw(base_family = "Times New Roman") +
 			theme(legend.position = "bottom", 
 						plot.title = element_text(hjust = 0.5)) + 
@@ -882,12 +882,21 @@ dat %>% group_by(BorrowerState) %>%
 
 #### EmploymentStatus
 
-```{r}
-bar_plot(dat, EmploymentStatus)
+```{r, fig.asp=1.3}
+gridExtra::grid.arrange(
+  bar_plot(dat, EmploymentStatus, facet_ncol = 1),
+  ggplot(dat, aes(fct_rev(EmploymentStatus))) + 
+    geom_bar(fill = "red", alpha = 0.6, width = 0.8) + 
+    coord_flip() + theme_bw(base_family = "Georgia") +
+    labs(x = ""),
+  nrow = 1
+)
 ```
 
 We can see that the default ratio of the borrowers whose `EmploymentStatus` is
-either "Not employed" or "Other" is higher than those who are employed.
+either "Not employed" or "Other" is higher than those who are employed. Also,
+we should noticed that the number of loans has a high variance among different
+`EmploymentStatus` groups.
 
 #### Occupation
 
