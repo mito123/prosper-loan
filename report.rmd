@@ -484,6 +484,18 @@ which means `ProsperScore` can provide addtional information along with
 
 ## What's the distribution of BorrowerRate in this dataset?
 
+```{r}
+dat %>%
+  ggplot(aes(BorrowerRate)) +
+  geom_histogram(
+    binwidth = 0.01, color = "darkred",
+    fill = "grey", alpha = 0.9)
+```
+
+The above histgoram plot shows that the distribution of BorrowerRate roughly 
+follows a normal distribution, however there is a pinnacle at 0.32, which is a 
+rather high BorrowerRate.
+
 ## What's the number of the loans in each BorrowerState?
 
 ## What's the percentage of each Occupation in this dataset?
