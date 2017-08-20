@@ -761,10 +761,26 @@ Besides the `ProsperScore` and `ProsperRating`, there are other features may
 have relationships with the defaulted rate, a rigorous way to identify all the
 potential useful features is digging into each feature one by one, or divided
 all the feature into different groups based on their type and use some screening
-skills (e.g. correlation matrix) to pick out the most useful features. However, 
-I won't do this here in order to avoid making this report too long to read.
-Instead, I will choose some features (only a few feathers here, not the whole
-set for real life project) which may have relationships with defaulted rate base
+skills to pick out the most useful features. However, I won't do this here in 
+order to avoid making this report too long to read. Instead, here I will quickly
+create a correlation matrix plot for the numeric variables to see whether there
+are highly correlated features in the dataset.
+
+```{r}
+GGally::ggcorr(
+  dat, geom = "circle", min_size = 0, max_size = 5,
+  hjust = 1, size = 3, color = "grey50", layout.exp = 5
+)
+```
+
+From the above plot we see that some features have a very high correlation 
+between each other, and features with high correlation probably have a lot of
+inforamtion in common and may give rise to multicollinearity problems in the 
+model stage.
+
+In this project, I used the correlation matrix plot as a reference and then 
+choose the features (only a few features here, not the whole set for 
+real life project) which may have relationships with defaulted rate base
 on the domain knowledge:
 
 - `BorrowerRate`: 
