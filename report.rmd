@@ -533,6 +533,13 @@ similar and both of them follow a slightly positive skewed distribution.
 
 ## What's the distribution of LoanOriginalAmount in this dataset?
 
+```{r}
+dat %>% ggplot(aes(LoanOriginalAmount)) + geom_histogram(binwidth = 1000)
+```
+
+It's interesting to see that there are several peaks in the histogram: 
+4000, 10000, 15000, 20000, 25000, which is reasonable in the real world.
+
 ## Question: What's the percentage of each LoanStatus?
 
 ```{r echo=FALSE}
