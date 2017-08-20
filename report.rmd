@@ -1115,7 +1115,8 @@ ds <- dat %>%
 		CreditScoreRangeLower,
 		CreditScoreRangeUpper,
 		LoanOriginalAmount
-	) %>% na.omit()
+	) %>% na.omit() %>%
+  mutate(is_defaulted = if_else(is_defaulted == "Defaulted", 1, 0))
 ```
 
 After the data preprocessing of all the previous sections, now there are 
@@ -1180,22 +1181,28 @@ save(model_svm, file = "data/model_svm.rda")
 glm_result_test <- dplyr::mutate(
 	test_set,
 	pred = as.numeric(predict(model_glm, test_set, type = "response"))
-) %>% select(is_defaulted, pred)
+) %>% select(is_defaulted, pred) %>%
+  mutate(is_defaulted = as.factor(is_defaulted))
 ```
 
 ```{r}
 svm_result_test <- dplyr::mutate(
 	test_set,
 	pred = attr(predict(model_svm, test_set, probability = TRUE), 
-							"probabilities") %>% as.tibble() %$% Yes
-) %>% select(is_defaulted, pred)
+							"probabilities") %>% as.tibble() %$% Defaulted
+) %>% select(is_defaulted, pred) %>%
+  mutate(is_defaulted = as.factor(is_defaulted))
 ```
 
 
 ```{r}
 # function to visualise the model performance
 plot_result <- function(result) {
-	ggplot(result) +
+  result %>%
+    mutate(
+    is_defaulted = if_else(is_defaulted == 1, "Defaulted", "Not Defaulted")
+  ) %>%
+  ggplot() +
 		geom_jitter(aes(is_defaulted, pred, color = is_defaulted), 
 								width = 0.05, size = 0.01, alpha = 0.5) +
 		theme_bw() + theme(legend.position = "none")
