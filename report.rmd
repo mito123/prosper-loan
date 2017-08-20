@@ -1037,7 +1037,7 @@ Also, I found an interesting pattern for the college student group:
 dat %>% 
 	filter(stringi::stri_startswith_fixed(Occupation, "Student")) %>%
 	group_by(Occupation) %>% 
-	summarise(n = n(), defaulted_ratio = mean(is_defaulted == "Yes")) %>% 
+	summarise(n = n(), defaulted_ratio = mean(is_defaulted == "Defaulted")) %>% 
 	mutate(Occupation = fct_relevel(
 		Occupation,
 		"Student - College Freshman",
