@@ -620,7 +620,7 @@ dat %<>%
 	mutate(is_defaulted = as.factor(if_else(
 		(LoanStatus %in% c("Chargedoff", "Defaulted")) | 
 			(LoanStatus == "Completed" & !is.na(LoanFirstDefaultedCycleNumber)),
-		"Yes", "No"
+		"Defaulted", "Not Defaulted"
 	)))
 ```
 
