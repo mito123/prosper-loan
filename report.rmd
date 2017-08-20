@@ -196,13 +196,18 @@ For the Univariate Plots Section, I choose the following questions for
 this project:
 
 1. What's the date period of this dataset?
-1. What's the distribution of the category of the listing?
+1. What's the percentage of each ListingCategory in this dataset?
 1. What's the percentage of each EmploymentStatus in this dataset?
 1. What's the distribution of EmploymentStatusDuration in this dataset?
 1. What's the percentage of the Homeowner in the Borrowers?
 1. What's the distribution of IncomeRange of the Borrowers?
 1. What's the distribution of StatedMonthlyIncome of the Borrowers?
 1. What's the distribution of ProsperScore and ProsperRating in this dataset?
+1. What's the distribution of BorrowerRate in this dataset?
+1. What's the number of the loans in each BorrowerState?
+1. What's the percentage of each Occupation in this dataset?
+1. What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
+1. What's the distribution of LoanOriginalAmount in this dataset?
 1. What's the percentage of each LoanStatus in this dataset?
 1. What's the percentage of the defaulted loans?
 1. what's the distribution of the cycle of these defaulted loans?
@@ -471,6 +476,16 @@ The above violin plot shows a clear relationship between `ProsperScore` and
 obvious variation in `ProsperScore`, which means `ProsperScore` can provide 
 addtional information along with `ProsperRating`, so both variables will be 
 kept for future use.
+
+## What's the distribution of BorrowerRate in this dataset?
+
+## What's the number of the loans in each BorrowerState?
+
+## What's the percentage of each Occupation in this dataset?
+
+## What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
+
+## What's the distribution of LoanOriginalAmount in this dataset?
 
 ## Question: What's the percentage of each LoanStatus?
 
