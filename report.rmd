@@ -468,14 +468,19 @@ Now let's check the relationship between `ProsperRating` and `ProsperScore`:
 ```{r}
 dat %>% 
 	filter(!is.na(ProsperRating)) %>%
-	ggplot(aes(ProsperRating, ProsperScore)) + geom_violin()
+  count(ProsperRating, ProsperScore) %>%
+	ggplot(aes(ProsperRating, ProsperScore)) + 
+  geom_tile(aes(fill = n), alpha = 0.9) +
+  scale_fill_distiller(
+    type = "seq", palette = "OrRd", direction = 1
+  ) + theme_minimal()
 ```
 
-The above violin plot shows a clear relationship between `ProsperScore` and
-`ProsperRating`, however, in each category of the `ProsperRating`, there is
-obvious variation in `ProsperScore`, which means `ProsperScore` can provide 
-addtional information along with `ProsperRating`, so both variables will be 
-kept for future use.
+The above heatmap shows that there is a positive relationship between 
+`ProsperScore` and `ProsperRating`, however, in each category of the 
+`ProsperRating`, there is obvious variation in `ProsperScore`, 
+which means `ProsperScore` can provide addtional information along with 
+`ProsperRating`, so both variables will be kept for future use.
 
 ## What's the distribution of BorrowerRate in this dataset?
 
