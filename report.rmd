@@ -509,6 +509,15 @@ WY, AK, or VT have only a few loans.
 
 ## What's the percentage of each Occupation in this dataset?
 
+```{r}
+dat %>% ggplot(aes(Occupation %>% fct_infreq() %>% fct_rev())) + 
+  geom_bar() + coord_flip()
+```
+
+The above plot clearly shows that most borrowers were either unwilling to provide their 
+occupation information or have unusual occupation, because there are a lot 
+of "Other" value in the `Occupation` field.
+
 ## What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
 
 ## What's the distribution of LoanOriginalAmount in this dataset?
