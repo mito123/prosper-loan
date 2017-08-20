@@ -520,6 +520,17 @@ of "Other" value in the `Occupation` field.
 
 ## What's the distribution of CreditScoreRangeLower and CreditScoreRangeUpper?
 
+```{r}
+gridExtra::grid.arrange(
+  ggplot(dat, aes(CreditScoreRangeLower)) + geom_bar(),
+  ggplot(dat, aes(CreditScoreRangeUpper)) + geom_bar(),
+  nrow = 2
+)
+```
+
+The distribution of CreditScoreRangeLower and CreditScoreRangeUpper are quite 
+similar and both of them follow a slightly positive skewed distribution.
+
 ## What's the distribution of LoanOriginalAmount in this dataset?
 
 ## Question: What's the percentage of each LoanStatus?
