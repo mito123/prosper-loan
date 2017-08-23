@@ -1,4 +1,4 @@
-# Data Analyst Nanodegree Project: Explore and Summarise Data
+# Exploration of the Online Loan Data from Prosper
 
 ## About this Project
 
